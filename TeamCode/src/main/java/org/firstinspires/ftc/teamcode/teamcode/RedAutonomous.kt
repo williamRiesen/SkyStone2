@@ -3,30 +3,22 @@ package org.firstinspires.ftc.teamcode
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
-import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import com.qualcomm.robotcore.hardware.DcMotor
+import org.firstinspires.ftc.teamcode.teamcode.*
+import java.lang.Math.PI
 
 @Autonomous(name = "Red Autonomous", group = "Holobot")
-//@Disabled
 
 class RedAutonomous : LinearOpMode() {
 
     override fun runOpMode() {
-
-//        moveToViewNavTarget = AutonomousStep(-24.0, -12.0, name = "Move to View NavTarget")
-        alignWithFoundation.reflectOverXAxis()
-        backUpToLatchFoundation.reflectOverXAxis()
-        slideLeftToGoAroundFoundation.reflectOverXAxis()
-        backUpAlongsideFoundation.reflectOverXAxis()
-        pushFoundationToRight.reflectOverXAxis()
-        parkUnderBridge.reflectOverXAxis()
-        foundationGoalLine = -foundationGoalLine
-
-        initialize(hardwareMap,telemetry,RevBlinkinLedDriver.BlinkinPattern.RED)
-
+        startHeading = -PI / 2.0
+        for (step in steps){
+            step.reflectOverXAxis()
+        }
+        initialize(hardwareMap, RevBlinkinLedDriver.BlinkinPattern.RED)
+        checkList(telemetry,gamepad1,gamepad2, RevBlinkinLedDriver.BlinkinPattern.RED)
         waitForStart()
-
-        go(telemetry)
+        go()
     }
 }

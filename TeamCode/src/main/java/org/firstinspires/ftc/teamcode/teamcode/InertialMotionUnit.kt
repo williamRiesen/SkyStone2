@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode
+package org.firstinspires.ftc.teamcode.teamcode
 
 import com.qualcomm.hardware.bosch.BNO055IMU
 import com.qualcomm.hardware.bosch.BNO055IMU.Parameters
@@ -40,5 +40,4 @@ class InertialMotionUnit(hardwareMap: HardwareMap) {
     val yAccel
         get() = imu.linearAcceleration.yAccel
 
-    fun getAcceleration() = imu.linearAcceleration.xAccel.absoluteValue + imu.linearAcceleration.yAccel.absoluteValue
 }
