@@ -12,13 +12,13 @@ import java.lang.Math.PI
 class RedAutonomous : LinearOpMode() {
 
     override fun runOpMode() {
-        startHeading = -PI / 2.0
+
         for (step in steps){
             step.reflectOverXAxis()
         }
         initialize(hardwareMap, RevBlinkinLedDriver.BlinkinPattern.RED)
-        checkList(telemetry,gamepad1,gamepad2, RevBlinkinLedDriver.BlinkinPattern.RED)
+//        checkList(telemetry,gamepad1,gamepad2, RevBlinkinLedDriver.BlinkinPattern.RED)
         waitForStart()
-        go()
+        go(telemetry)
     }
 }

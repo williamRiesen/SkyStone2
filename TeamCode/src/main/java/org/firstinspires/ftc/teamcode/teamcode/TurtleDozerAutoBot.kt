@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.robotcore.external.Telemetry
 
 const val MAX_POWER = 0.75
 const val TICKS_PER_INCH = 128
@@ -30,7 +31,7 @@ class TurtleDozerAutoBot3(hardwareMap: HardwareMap) {
     private var xAccel = 0.0
     private var yAccel = 0.0
     private var driveCommand = DriveCommand(0.0, 0.0, 0.0)
-    private val heading
+    val heading
         get() = inertialMotionUnit.getHeading().toDouble() + startHeading
 
     fun bumpDrive(autonomousStep: AutonomousStep) {
@@ -118,10 +119,10 @@ class TurtleDozerAutoBot3(hardwareMap: HardwareMap) {
         val xSpeedScaled = driveCommand.xSpeed * ONE_OVER_SQRT2
         val ySpeedScaled = driveCommand.ySpeed * ONE_OVER_SQRT2
 
-        rightFrontDrive.power = -xSpeedScaled + ySpeedScaled - driveCommand.rotationSpeed
-        leftFrontDrive.power = -xSpeedScaled - ySpeedScaled - driveCommand.rotationSpeed
-        rightRearDrive.power = xSpeedScaled + ySpeedScaled - driveCommand.rotationSpeed
-        leftRearDrive.power = xSpeedScaled - ySpeedScaled - driveCommand.rotationSpeed
+        rightFrontDrive.power = -xSpeedScaled + ySpeedScaled + driveCommand.rotationSpeed
+        leftFrontDrive.power = -xSpeedScaled - ySpeedScaled + driveCommand.rotationSpeed
+        rightRearDrive.power = xSpeedScaled + ySpeedScaled + driveCommand.rotationSpeed
+        leftRearDrive.power = xSpeedScaled - ySpeedScaled + driveCommand.rotationSpeed
 
     }
 
@@ -137,7 +138,7 @@ class TurtleDozerAutoBot3(hardwareMap: HardwareMap) {
         }
     }
 
-    fun drive(autonomousStep: AutonomousStep) {
+    fun drive(autonomousStep: AutonomousStep,telemetry: Telemetry) {
         for (motor in allMotors) {
             motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
             motor.mode = DcMotor.RunMode.RUN_USING_ENCODER
@@ -151,13 +152,10 @@ class TurtleDozerAutoBot3(hardwareMap: HardwareMap) {
                     rotationSpeed = 0.0)
 
             while (runTimer.seconds() < runDuration) {
-
-                if(autonomousStep.desiredHeading > robot.heading) {
-                    driveCommand.rotationSpeed = (autonomousStep.desiredHeading - robot.heading)
-                }else  {
-                    driveCommand.rotationSpeed = (robot.heading - autonomousStep.desiredHeading)
-                }
-
+                driveCommand.rotationSpeed = (autonomousStep.desiredHeading - robot.heading)
+                telemetry.addData("Desired Heading",autonomousStep.desiredHeading)
+                telemetry.addData("Heading", robot.heading)
+                telemetry.update()
                 setDriveMotion(driveCommand)
                 updateAccelLights()
             }

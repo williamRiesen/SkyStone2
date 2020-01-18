@@ -6,17 +6,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import java.lang.Math.PI
 
-@Autonomous(name = "Blue Autonomous", group = "Holobot")
+@Autonomous(name = "Debug Autonomous", group = "Holobot")
 
-class BlueAutonomous : LinearOpMode() {
+class DebugAutonomous : LinearOpMode() {
 
     override fun runOpMode() {
-        startHeading = PI/2.0
+        startHeading = 0.0
         initialize(hardwareMap, RevBlinkinLedDriver.BlinkinPattern.BLUE)
 //        checkList(telemetry,gamepad1,gamepad2, RevBlinkinLedDriver.BlinkinPattern.BLUE)
         waitForStart()
-        go(telemetry)
+        robot.drive(AutonomousStep(0.0,12.0,0.5,PI/4.0),telemetry)
     }
-
-
 }

@@ -8,19 +8,18 @@ import com.qualcomm.robotcore.hardware.Gamepad
 import kotlin.math.PI
 
 lateinit var robot: TurtleDozerAutoBot3
-val startLocation = convertTilesToInches(0.0, 0.0)
+var startLocation = convertTilesToInches(0.0, 0.0)
 var startHeading = PI / 2.0
-val alignWithFoundation = convertTilesToInches(0.5, -1.0)
-val bumpSideWall = convertTilesToInches(2.0, 0.0)
-val reboundToAlignWithFoundation = AutonomousStep(-16.0, 0.0, 0.5)
-val backUpToLatchFoundation = convertTilesToInches(0.0, -0.35, 0.1)
-val dragFoundation = convertTilesToInches(0.0, 2.0)
-val shiftTowardAudience = convertTilesToInches(-1.25, 0.0)
-val backUpToGoAroundFoundation = convertTilesToInches(1.9, 0.0, 0.75, PI)
-val advanceAwayFromAudience = convertTilesToInches(0.0, 1.3, 0.75, PI)
-val pushFoundationHome = convertTilesToInches(-3.0, 0.0,0.75, PI)
-val backUpAlongsideFoundation = convertTilesToInches(1.0, 2.0)
-val parkUnderBridge = convertTilesToInches(0.0, -2.0, 0.75, PI)
+var alignWithFoundation = convertTilesToInches(0.5, -1.0)
+var bumpSideWall = convertTilesToInches(2.0, 0.0)
+var reboundToAlignWithFoundation = AutonomousStep(-16.0, 0.0, 0.5)
+var backUpToLatchFoundation = convertTilesToInches(0.0, -0.35, 0.1)
+var dragFoundation = convertTilesToInches(0.0, 2.0)
+var shiftTowardAudience = convertTilesToInches(-1.25, 0.0)
+var backUpToGoAroundFoundation = convertTilesToInches(1.9, 0.0, 0.75, 0.0)
+var advanceAwayFromAudience = convertTilesToInches(0.0, 1.3, 0.75, 0.0)
+var pushFoundationHome = convertTilesToInches(-3.0, 0.0,0.75, 0.0)
+var parkUnderBridge = convertTilesToInches(0.0, -2.0, 0.75, 0.0)
 val steps = listOf(
         startLocation,
         alignWithFoundation,
@@ -32,7 +31,6 @@ val steps = listOf(
         backUpToGoAroundFoundation,
         advanceAwayFromAudience,
         pushFoundationHome,
-        backUpAlongsideFoundation,
         parkUnderBridge)
 
 
@@ -69,21 +67,21 @@ fun checkList(
     telemetry.update()
 }
 
-fun go() {
+fun go(telemetry: Telemetry) {
     with(robot) {
         blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK)
-        drive(alignWithFoundation)
+        drive(alignWithFoundation,telemetry)
         bumpDrive(bumpSideWall)
-        drive(reboundToAlignWithFoundation)
+        drive(reboundToAlignWithFoundation,telemetry)
         deployHook()
-        drive(backUpToLatchFoundation)
-        drive(dragFoundation)
+        drive(backUpToLatchFoundation,telemetry)
+        drive(dragFoundation,telemetry)
         unlatchHook()
-        drive(shiftTowardAudience)
-        drive(backUpToGoAroundFoundation)
-        drive(advanceAwayFromAudience)
-        drive(pushFoundationHome)
-        drive(parkUnderBridge)
+        drive(shiftTowardAudience,telemetry)
+        drive(backUpToGoAroundFoundation,telemetry)
+        drive(advanceAwayFromAudience,telemetry)
+        drive(pushFoundationHome,telemetry)
+        drive(parkUnderBridge,telemetry)
         kennethClawLeft.position = clawRestPosition
         kennethClawRight.position = clawRestPosition
         blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.TWINKLES_PARTY_PALETTE)
