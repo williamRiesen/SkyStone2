@@ -14,12 +14,8 @@ class AutonomousStep(
     }
 
     fun reflectOverXAxis() {
-        if (desiredHeading == PI / 2.0) {
-            x = -x
-        } else if (desiredHeading == 0.0) {
-            desiredHeading = PI
-            x = -x
-        }
+        x = -x
+        if (desiredHeading == 0.0) desiredHeading = PI
     }
 
     val length

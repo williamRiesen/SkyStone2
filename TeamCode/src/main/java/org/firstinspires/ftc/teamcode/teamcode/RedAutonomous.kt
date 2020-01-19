@@ -13,11 +13,9 @@ class RedAutonomous : LinearOpMode() {
 
     override fun runOpMode() {
 
-        for (step in steps){
-            step.reflectOverXAxis()
-        }
-        initialize(hardwareMap, RevBlinkinLedDriver.BlinkinPattern.RED)
-//        checkList(telemetry,gamepad1,gamepad2, RevBlinkinLedDriver.BlinkinPattern.RED)
+
+        initialize(hardwareMap, Alliance.RED)
+        checkList(telemetry,gamepad1,gamepad2, RevBlinkinLedDriver.BlinkinPattern.RED)
         waitForStart()
         go(telemetry)
     }

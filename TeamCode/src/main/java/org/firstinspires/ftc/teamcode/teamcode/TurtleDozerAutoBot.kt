@@ -11,7 +11,7 @@ const val MAX_POWER = 0.75
 const val TICKS_PER_INCH = 128
 const val ONE_OVER_SQRT2 = 0.70710678118
 const val INCHES_PER_SEC_PER_POWER_UNIT = 20.5
-const val clawRestPosition = 0.35
+const val clawRestPosition = 0.20
 val STOP = DriveCommand(0.0, 0.0, 0.0)
 
 class TurtleDozerAutoBot3(hardwareMap: HardwareMap) {
