@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
 import kotlin.math.PI
 
-
 const val ROTATION_SPEED_ADJUST = 0.5
+
 @TeleOp(name = "TeleOp", group = "TurtleDozer.")
 class TeleOp : OpMode() {
     private lateinit var robot: TurtleDozerTeleBot
@@ -26,28 +26,31 @@ class TeleOp : OpMode() {
 
     override fun init() {
         robot = TurtleDozerTeleBot(hardwareMap)
-        robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN)
         timer.reset()
+        when (alliance) {
+            Alliance.BLUE -> robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE)
+            Alliance.RED -> robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED)
+        }
     }
 
-    override fun init_loop() {
-        if (gamepad2.b) {
-            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED)
-            allianceIsBlue = false
-        }
-        if (gamepad2.x) {
-            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE)
-            allianceIsBlue = true
-        }
-        if (gamepad2.y) {
-            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW)
-            allianceIsBlue = false
-        }
-        if (gamepad2.a) {
-            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN)
-            allianceIsBlue = false
-        }
-    }
+//    override fun init_loop() {
+//        if (gamepad2.b) {
+//            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED)
+//            allianceIsBlue = false
+//        }
+//        if (gamepad2.x) {
+//            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE)
+//            allianceIsBlue = true
+//        }
+//        if (gamepad2.y) {
+//            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW)
+//            allianceIsBlue = false
+//        }
+//        if (gamepad2.a) {
+//            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN)
+//            allianceIsBlue = false
+//        }
+//    }
 
     private fun updateElevatorPosition() {
         val timePassed = timer.milliseconds() - timeStamp
@@ -68,7 +71,6 @@ class TeleOp : OpMode() {
     }
 
     override fun loop() {
-
         updateElevatorPosition()
         val gamepadInput = -gamepad2.left_stick_y.toDouble()
         if (robot.elevatorIsAtBottomLimit) {
@@ -95,17 +97,37 @@ class TeleOp : OpMode() {
         if (gamepad2.dpad_up) {
             robot.unlatchHook()
         }
-        if (gamepad2.b) {
-            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED)
-            allianceIsBlue = false
-        }
+
         if (gamepad2.x) {
-            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE)
-            allianceIsBlue = true
+            robot.launcher.power = 0.2
         }
+        if (gamepad2.b) {
+            robot.launcher.power = -0.2
+        }
+
+        if (!gamepad2.x  && !gamepad2.b){
+            robot.launcher.power = 0.0
+        }
+
+
+
+
+
+
+
+//        if (gamepad2.b) {
+//            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED)
+//            allianceIsBlue = false
+//        }
+//        if (gamepad2.x) {
+//            robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE)
+//            allianceIsBlue = true
+//        }
         if (timer.seconds() > 90) {
-            if (allianceIsBlue) robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_BLUE)
-            else robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_RED)
+            when (alliance) {
+                Alliance.BLUE -> robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_BLUE)
+                Alliance.RED -> robot.blinkyLights.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_RED)
+            }
         }
 
         when {
@@ -124,11 +146,18 @@ class TeleOp : OpMode() {
         val rotation = gamepad1.left_stick_x.toDouble()
         val xScooch = gamepad1.right_stick_x.toDouble()
         val yScooch = -gamepad1.right_stick_y.toDouble()
-        val heading = robot.inertialMotionUnit.getHeading()
+
 
         val driveCommand = DriveCommand(xScooch, yScooch, rotation * ROTATION_SPEED_ADJUST)
-        driveCommand.rotate(heading - startHeading)
+
+        telemetry.addData("heading", robot.heading)
+        telemetry.update()
+        driveCommand.rotate(robot.heading)
+
+
         robot.setDriveMotion(driveCommand)
+
+
     }
 }
 

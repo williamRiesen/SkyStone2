@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import com.qualcomm.robotcore.hardware.Gamepad
 import kotlin.math.PI
 lateinit var robot: TurtleDozerAutoBot3
-lateinit var alliance: Alliance
+var alliance = Alliance.BLUE
 var startHeading = PI / 2.0
 var startLocation = convertTilesToInches(0.0, 0.0)
 var alignWithFoundation = convertTilesToInches(0.5, -1.0)

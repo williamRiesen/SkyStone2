@@ -12,6 +12,7 @@ class TurtleDozerTeleBot(hardwareMap: HardwareMap) {
     val kennethClawRight: Servo = hardwareMap.get(Servo::class.java, "kennethClawRight")
     val kennethClawLeft: Servo = hardwareMap.get(Servo::class.java, "kennethClawLeft")
     val kennethElevator: CRServo = hardwareMap.get(CRServo::class.java, "kennethElevator")
+    val launcher: CRServo = hardwareMap.get(CRServo::class.java, "launcher")
     private val tailHook: Servo? = hardwareMap.get(Servo::class.java, "tailhook")
     private val rightFrontDrive: DcMotor? = hardwareMap.get(DcMotor::class.java, "rightFrontDrive")
     private val leftFrontDrive: DcMotor? = hardwareMap.get(DcMotor::class.java, "leftFrontDrive")
@@ -23,6 +24,8 @@ class TurtleDozerTeleBot(hardwareMap: HardwareMap) {
 
     val inertialMotionUnit: InertialMotionUnit = InertialMotionUnit(hardwareMap)
     private var parameters: Parameters = Parameters()
+    val heading
+        get() = inertialMotionUnit.getHeading() + startHeading.toFloat()
 
     init {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES
@@ -39,6 +42,7 @@ class TurtleDozerTeleBot(hardwareMap: HardwareMap) {
     val elevatorIsAtBottomLimit
         get() = !elevatorLowerLimitSwitch.state
 
+
     fun setDriveMotion(command: DriveCommand) {
         for (motor in allMotors) if (motor != null) {
             motor.mode = DcMotor.RunMode.RUN_USING_ENCODER
@@ -46,16 +50,16 @@ class TurtleDozerTeleBot(hardwareMap: HardwareMap) {
         val xSpeedScaled = command.xSpeed * ONE_OVER_SQRT2
         val ySpeedScaled = command.ySpeed * ONE_OVER_SQRT2
         if (rightFrontDrive != null) {
-            rightFrontDrive.power = -xSpeedScaled + ySpeedScaled - command.rotationSpeed
+            rightFrontDrive.power = -xSpeedScaled + ySpeedScaled + command.rotationSpeed
         }
         if (leftFrontDrive != null) {
-            leftFrontDrive.power = -xSpeedScaled - ySpeedScaled - command.rotationSpeed
+            leftFrontDrive.power = -xSpeedScaled - ySpeedScaled + command.rotationSpeed
         }
         if (rightRearDrive != null) {
-            rightRearDrive.power = xSpeedScaled + ySpeedScaled - command.rotationSpeed
+            rightRearDrive.power = xSpeedScaled + ySpeedScaled + command.rotationSpeed
         }
         if (leftRearDrive != null) {
-            leftRearDrive.power = xSpeedScaled - ySpeedScaled - command.rotationSpeed
+            leftRearDrive.power = xSpeedScaled - ySpeedScaled + command.rotationSpeed
         }
     }
 
@@ -71,4 +75,7 @@ class TurtleDozerTeleBot(hardwareMap: HardwareMap) {
         }
     }
 
-}
+
+    }
+
+

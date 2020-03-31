@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teamcode
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver
+import com.qualcomm.robotcore.hardware.CRServo
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.Servo
@@ -16,6 +17,7 @@ val STOP = DriveCommand(0.0, 0.0, 0.0)
 
 class TurtleDozerAutoBot3(hardwareMap: HardwareMap) {
 
+    val launcher: CRServo = hardwareMap.get(CRServo::class.java, "launcher")
     val kennethClawRight: Servo = hardwareMap.get(Servo::class.java, "kennethClawRight")
     val kennethClawLeft: Servo = hardwareMap.get(Servo::class.java, "kennethClawLeft")
     val blinkyLights: RevBlinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver::class.java, "blinkyLights")
@@ -31,7 +33,7 @@ class TurtleDozerAutoBot3(hardwareMap: HardwareMap) {
     private var xAccel = 0.0
     private var yAccel = 0.0
     private var driveCommand = DriveCommand(0.0, 0.0, 0.0)
-    val heading
+    private val heading
         get() = inertialMotionUnit.getHeading().toDouble() + startHeading
 
     fun bumpDrive(autonomousStep: AutonomousStep) {
@@ -158,8 +160,10 @@ class TurtleDozerAutoBot3(hardwareMap: HardwareMap) {
                 telemetry.update()
                 setDriveMotion(driveCommand)
                 updateAccelLights()
+
             }
         }
+
         setDriveMotion(STOP)
     }
 }
