@@ -1,17 +1,19 @@
 package org.firstinspires.ftc.teamcode.teamcode
 
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.DigitalChannel
-import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.hardware.*
+import com.qualcomm.robotcore.util.ElapsedTime
 
+const val ALARM_RESET_POSITION = 0.0
+const val ALARM_STRIKE_POSITION = 0.12
 
 class RoboVent(hardwareMap: HardwareMap) {
 
     private val ventMotor: DcMotor = hardwareMap.get(DcMotor::class.java, "ventMotor")
-    val trigger: DigitalChannel = hardwareMap.get<DigitalChannel>(DigitalChannel::class.java, "sensor_digital")
-
-
+    val button: DigitalChannel = hardwareMap.get<DigitalChannel>(DigitalChannel::class.java, "sensor_digital")
+    val airflowSensor = hardwareMap.get(I2cDeviceSynch::class.java, "airflow_sensor")
+    private val alarmBell: Servo = hardwareMap.get(Servo::class.java, "alarmBell")
+    private val bellTimer = ElapsedTime()
+    private var alarmState = false
 
     init {
         ventMotor.direction = DcMotorSimple.Direction.REVERSE
@@ -19,12 +21,11 @@ class RoboVent(hardwareMap: HardwareMap) {
         ventMotor.targetPosition = 0
         ventMotor.mode = DcMotor.RunMode.RUN_TO_POSITION
         ventMotor.power = 0.0
-        trigger.mode = DigitalChannel.Mode.INPUT
+        button.mode = DigitalChannel.Mode.INPUT
+        airflowSensor.engage()
+        val manufacturerAddress = I2cAddr.create7bit(0x49)
+        airflowSensor.i2cAddress = manufacturerAddress
     }
-
-
-
-
 
     var state = "Waiting at End Expiration"
 
@@ -49,6 +50,44 @@ class RoboVent(hardwareMap: HardwareMap) {
         ventMotor.targetPosition = 0
         ventMotor.power = EXPIRATION_SPEED
     }
+
+    fun readAirflow():Int {
+        val reading = airflowSensor.read(0, 2)
+        val byteOne = reading[0]
+        val byteTwo = reading[1]
+        return reading[0] * 64 + reading[1]
+    }
+
+    private fun strikeAlarmBell(){
+        alarmBell.position = ALARM_STRIKE_POSITION
+    }
+
+    private fun resetAlarmStriker(){
+        alarmBell.position = ALARM_RESET_POSITION
+    }
+
+    fun raiseAlarm(){
+        alarmState = true
+    }
+
+    fun resetAlarm(){
+        alarmState = false
+    }
+
+    fun updateAlarmBell(){
+        if (alarmState){
+            val portionOfSecond = bellTimer.seconds() - bellTimer.seconds().toInt()
+            when (portionOfSecond){
+                in (0.0..0.2) -> strikeAlarmBell()
+                in (0.2..0.5) ->  resetAlarmStriker()
+                in (0.5..0.7)-> strikeAlarmBell()
+                else -> resetAlarmStriker()
+            }
+        }
+        else resetAlarmStriker()
+    }
+
+
 }
 
 

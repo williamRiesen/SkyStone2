@@ -23,13 +23,11 @@ class AirFlowSensorTest : LinearOpMode() {
         airflowSensor.i2cAddress = manufacturerAddress
         waitForStart()
         while (opModeIsActive()) {
-            val reading = airflowSensor.read(0, 3)
-            val byteOne = String.format("%02X", reading[0])
-            val byteTwo = String.format("%02X", reading[1])
-            val byteThree = String.format("%02X", reading[2])
+            val reading = airflowSensor.read(0, 2)
+            val byteOne = reading[0]
+            val byteTwo = reading[1]
             telemetry.addData("byteOne", byteOne)
             telemetry.addData("byteTwo", byteTwo)
-            telemetry.addData("byteThree", byteThree)
             telemetry.update()
             Thread.sleep(20)
         }
