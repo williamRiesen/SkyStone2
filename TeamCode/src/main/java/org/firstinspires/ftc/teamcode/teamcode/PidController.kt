@@ -13,17 +13,19 @@ class PidControl : OpMode() {
     private val kp = 0.0005
     private val ki = 0.00005
     private val kd = 0
-    private val bias = 0.2
+    private var bias = 0.15
     private val iterationTimer = ElapsedTime()
     private val cycleTimer = ElapsedTime()
-    private var endInspiratoryPosition = 250
+    private var endInspiratoryPosition = 300
     private val endExpiratoryPosition = 0
-    private val targetExpiratorySpeed = -380.0
-    private val targetInspiratorySpeed =380.0
+    private val targetExpiratorySpeed = -450.0
+    private val targetInspiratorySpeed = 450.0
     private var targetSpeed = targetInspiratorySpeed
     private var targetPosition = endInspiratoryPosition
     private var state = VentState.DELIVERING_INSPIRATION
     private var positionPrior = 0
+    private val loadRamp = 0.0005
+    private var applyRamp = 1.0
 
     override fun init() {
         vent = RoboVent(hardwareMap)
@@ -31,37 +33,72 @@ class PidControl : OpMode() {
         positionPrior = vent.currentPosition
     }
 
+    override fun init_loop() {
+        telemetry.addData("Resp Rate: ", vent.respiratoryRateSetting)
+        telemetry.addData("Load Ramp: ", vent.rampSetting)
+        telemetry.update()
+    }
+
     override fun loop() {
         val cycleTime = SECONDS_IN_A_MINUTE / vent.respiratoryRateSetting
-//        val startExpirationTime = cycleTime * I_TO_E_RATIO
-//        if (state == VentState.ALLOWING_EXPIRATION && cycleTimer.seconds() > cycleTime) {
-//            switchToInspiration()
-//        } else if (state == VentState.DELIVERING_INSPIRATION && cycleTimer.seconds() > startExpirationTime) {
-//            switchToExpiration()
-//        }
+        val startExpirationTime = cycleTime * I_TO_E_RATIO
+        endInspiratoryPosition = (vent.tidalVolumeSetting * TIDAL_VOLUME_CALIBRATION).toInt()
+        if (state == VentState.DELIVERING_INSPIRATION && vent.currentPosition > endInspiratoryPosition) {
+            switchToWaitingAfterInspiration()
+        } else if (state == VentState.WAITING_AFTER_INSPIRATION && cycleTimer.seconds() > startExpirationTime) {
+            switchToExpiration()
+        } else if (state == VentState.ALLOWING_EXPIRATION && vent.currentPosition < endExpiratoryPosition) {
+            switchToWaitingAfterExpiration()
+        } else if (state == VentState.WAITNG_AFTER_EXPIRATION && cycleTimer.seconds() > cycleTime){
+            switchToInspiration()
+        }
+
         val iterationTime = iterationTimer.seconds()
         iterationTimer.reset()
-        var currentSpeed = (vent.currentPosition - positionPrior) / iterationTime
+        val currentPosition = vent.currentPosition
+        var currentSpeed = (currentPosition - positionPrior) / iterationTime
         val delta = targetSpeed - currentSpeed
         val integral = integralPrior + delta * iterationTime
         val derivative = (delta - deltaPrior) / iterationTime
-        val output = kp * delta + ki * integral + kd * derivative + bias
+        val ramp = currentPosition * loadRamp  * applyRamp
+        val output = kp * delta + ki * integral + kd * derivative + bias + ramp
         deltaPrior = delta
         integralPrior = integral
-        positionPrior = vent.currentPosition
+        positionPrior = currentPosition
 
         vent.motorPower = output
-        telemetry.addData("Speed: ", currentSpeed)
-        telemetry.addData("Delta: ", delta)
-        telemetry.addData("Integral: ", integral)
+//        telemetry.addData("Speed: ", currentSpeed)
+//        telemetry.addData("Delta: ", delta)
+//        telemetry.addData("Integral: ", integral)
+//        telemetry.addData("Load Ramp:", loadRamp)
         telemetry.addData("Motor Power: ", vent.motorPower)
         telemetry.update()
-        Thread.sleep(50)
+        Thread.sleep(10)
+    }
+
+    private fun switchToWaitingAfterInspiration() {
+        state = VentState.WAITING_AFTER_INSPIRATION
+        targetSpeed = 0.0
+        bias = 0.0
+        applyRamp = 0.0
+//        targetPosition = endExpiratoryPosition
+        resetPID()
     }
 
     private fun switchToExpiration() {
         state = VentState.ALLOWING_EXPIRATION
         targetSpeed = targetExpiratorySpeed
+        bias = -0.15
+        applyRamp = 0.0
+//        targetPosition = endExpiratoryPosition
+        resetPID()
+    }
+
+    private fun switchToWaitingAfterExpiration() {
+        state = VentState.WAITNG_AFTER_EXPIRATION
+        targetSpeed = 0.0
+        bias = 0.0
+        applyRamp = 0.0
 //        targetPosition = endExpiratoryPosition
         resetPID()
     }
@@ -70,6 +107,8 @@ class PidControl : OpMode() {
         state = VentState.DELIVERING_INSPIRATION
         cycleTimer.reset()
         targetSpeed = targetInspiratorySpeed
+        bias = 0.15
+        applyRamp = 1.0
 //        targetPosition = endInspiratoryPosition
         resetPID()
     }

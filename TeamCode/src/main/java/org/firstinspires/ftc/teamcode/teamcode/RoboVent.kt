@@ -43,7 +43,7 @@ class RoboVent(hardwareMap: HardwareMap) {
 
     fun deliverInspiration() {
         state = "Delivering Inspiration"
-        val endExpiratoryPosition = tidalVolume.toInt() * TICKS_PER_ML
+        val endExpiratoryPosition = tidalVolumeSetting.toInt() * TICKS_PER_ML
         ventMotor.targetPosition = endExpiratoryPosition
         ventMotor.power = INSPIRATION_SPEED
     }
@@ -87,11 +87,11 @@ class RoboVent(hardwareMap: HardwareMap) {
         } else resetAlarmStriker()
     }
 
-    var respiratoryRateSetting = 12.0
+    var respiratoryRateSetting = rateControl.voltage * 40.0
         get() = rateControl.voltage * 40.0
 
-    var tidalVolume = 450.0
-        get() = volumeContol.voltage * 800
+    var tidalVolumeSetting = 450 // volumeContol.voltage * 800
+//        get() = volumeContol.voltage * 800
 
     var motorMode
         get() = ventMotor.mode
@@ -107,6 +107,9 @@ class RoboVent(hardwareMap: HardwareMap) {
         set(value) {
             ventMotor.power = value
         }
+
+    val rampSetting
+        get() = volumeContol.voltage
 
 
 

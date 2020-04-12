@@ -14,6 +14,7 @@ const val INSPIRATORY_HOLD_TIME_SEC = 2.0.toLong()
 const val TRIGGER_THRESHOLD = 20
 const val BASELINE_AIRFLOW_SENSOR_OUTPUT = 490
 const val I_TO_E_RATIO = 0.33
+const val TIDAL_VOLUME_CALIBRATION = 1.0
 
 @TeleOp(name = "A/C Ventilation", group = "RoboVent")
 class AcVentilation : OpMode() {
@@ -64,7 +65,7 @@ class AcVentilation : OpMode() {
         telemetry.addData("State", vent.state)
         telemetry.addData("Flow rate: ", airflow)
         telemetry.addData("Rate: ", vent.respiratoryRateSetting)
-        telemetry.addData("Tidal Vol: ", vent.tidalVolume)
+        telemetry.addData("Tidal Vol: ", vent.tidalVolumeSetting)
         telemetry.update()
     }
 }
