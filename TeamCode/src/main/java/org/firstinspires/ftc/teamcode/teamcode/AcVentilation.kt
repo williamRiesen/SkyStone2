@@ -56,10 +56,7 @@ class AcVentilation : OpMode() {
             apneaTimer.reset()
             apnea = false
         }
-        if (apneaTimer.seconds() > 10) apnea = true
-//        testButtonPressed = !vent.button.state
-        if (apnea || testButtonPressed) vent.raiseAlarm()
-        else vent.resetAlarm()
+        vent.apneaAlarm = apneaTimer.seconds() > 10.0
 
         vent.updateAlarmBell()
         telemetry.addData("State", vent.state)

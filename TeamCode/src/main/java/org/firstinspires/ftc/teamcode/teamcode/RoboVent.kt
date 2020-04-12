@@ -15,7 +15,7 @@ class RoboVent(hardwareMap: HardwareMap) {
     private val volumeContol = hardwareMap.get(AnalogInput::class.java, "volume_control")
     private val alarmBell: Servo = hardwareMap.get(Servo::class.java, "alarm_bell")
     private val bellTimer = ElapsedTime()
-    private var alarmState = false
+    private val silenceTimer = ElapsedTime()
 
     init {
         ventMotor.direction = DcMotorSimple.Direction.REVERSE
@@ -67,24 +67,47 @@ class RoboVent(hardwareMap: HardwareMap) {
         alarmBell.position = ALARM_RESET_POSITION
     }
 
-    fun raiseAlarm() {
-        alarmState = true
-    }
+    var apneaAlarm = false
+    var noReturnFlowAlarm = false
+    var tachypneaAlarm = false
+    var highPressureAlarm = false
+    var alarmsSilenced = false
 
-    fun resetAlarm() {
-        alarmState = false
-    }
 
     fun updateAlarmBell() {
-        if (alarmState) {
-            val portionOfSecond = bellTimer.seconds() - bellTimer.seconds().toInt()
-            when (portionOfSecond) {
-                in (0.0..0.2) -> strikeAlarmBell()
-                in (0.2..0.5) -> resetAlarmStriker()
-                in (0.5..0.7) -> strikeAlarmBell()
-                else -> resetAlarmStriker()
+        if (silenceTimer.seconds() > 60) alarmsSilenced = false
+        if (bellTimer.seconds() > 2.5) bellTimer.reset()
+        val alarmBellCount = when {
+            alarmsSilenced -> 0
+            apneaAlarm -> 4
+            noReturnFlowAlarm -> 3
+            tachypneaAlarm -> 2
+            highPressureAlarm -> 1
+            else -> 0
+        }
+
+        when (bellTimer.seconds()) {
+            in (0.0..0.2) -> {
+                if (alarmBellCount > 0) strikeAlarmBell()
             }
-        } else resetAlarmStriker()
+            in (0.2..0.5) -> resetAlarmStriker()
+            in (0.5..0.7) -> {
+                if (alarmBellCount > 1) strikeAlarmBell()
+            }
+            in (0.7..1.0) -> resetAlarmStriker()
+            in (1.0..1.2) -> {
+                if (alarmBellCount > 2) strikeAlarmBell()
+            }
+            in (1.2..1.5) -> resetAlarmStriker()
+            in (1.5..1.7) -> {
+                if (alarmBellCount > 3) strikeAlarmBell()
+            }
+            in (1.7..2.0) -> resetAlarmStriker()
+            in (2.0..2.5) -> {
+            }
+            else -> bellTimer.reset()
+
+        }
     }
 
     var respiratoryRateSetting = rateControl.voltage * 40.0
@@ -95,7 +118,7 @@ class RoboVent(hardwareMap: HardwareMap) {
 
     var motorMode
         get() = ventMotor.mode
-        set(value){
+        set(value) {
             ventMotor.mode = value
         }
 
@@ -110,8 +133,6 @@ class RoboVent(hardwareMap: HardwareMap) {
 
 //    val tunerSetting
 //        get() = volumeContol.voltage
-
-
 
 
 }

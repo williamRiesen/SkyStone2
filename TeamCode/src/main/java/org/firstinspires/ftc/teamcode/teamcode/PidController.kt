@@ -27,6 +27,9 @@ class PidControl : OpMode() {
     private val loadRamp = 0.0005
     private var applyRamp = 1.0
     private var peakPower = 0.0
+    private var airflow = 0
+    private val apneaTimer = ElapsedTime()
+    private val returnFlowTimer = ElapsedTime()
 
     override fun init() {
         vent = RoboVent(hardwareMap)
@@ -71,11 +74,26 @@ class PidControl : OpMode() {
         if (output > peakPower) peakPower = output
 
         vent.motorPower = output
+
+        airflow = vent.readAirflow()
+        if (airflow > 1000) apneaTimer.reset()
+        if (airflow < 250) returnFlowTimer.reset()
+        vent.apneaAlarm = apneaTimer.seconds() > 10.0
+        vent.noReturnFlowAlarm = returnFlowTimer.seconds() > 10.0
+        vent.updateAlarmBell()
+
+
+
+
+
+
+
 //        telemetry.addData("Speed: ", currentSpeed)
 //        telemetry.addData("Delta: ", delta)
-        telemetry.addData("Integral: ", integral)
+//        telemetry.addData("Integral: ", integral)
 //        telemetry.addData("Load Ramp:", loadRamp)
         telemetry.addData("Tidal Volume Setting: ", vent.tidalVolumeSetting)
+        telemetry.addData("Flow rate: ", airflow)
         telemetry.addData("Peak Power: ", peakPower)
         telemetry.update()
         Thread.sleep(10)
