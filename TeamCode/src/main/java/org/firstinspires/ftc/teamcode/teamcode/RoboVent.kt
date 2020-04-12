@@ -10,9 +10,9 @@ class RoboVent(hardwareMap: HardwareMap) {
 
     private val ventMotor: DcMotor = hardwareMap.get(DcMotor::class.java, "vent_motor")
     //    val button: DigitalChannel = hardwareMap.get<DigitalChannel>(DigitalChannel::class.java, "sensor_digital")
-    val airflowSensor = hardwareMap.get(I2cDeviceSynch::class.java, "airflow_sensor")
+    private val airflowSensor = hardwareMap.get(I2cDeviceSynch::class.java, "airflow_sensor")!!
     private val rateControl = hardwareMap.get(AnalogInput::class.java, "rate_control")
-    private val volumeContol = hardwareMap.get(AnalogInput::class.java, "volume_control")
+    private val volumeControl = hardwareMap.get(AnalogInput::class.java, "volume_control")
     private val alarmBell: Servo = hardwareMap.get(Servo::class.java, "alarm_bell")
     private val bellTimer = ElapsedTime()
     private val silenceTimer = ElapsedTime()
@@ -113,10 +113,10 @@ class RoboVent(hardwareMap: HardwareMap) {
     var respiratoryRateSetting = rateControl.voltage * 40.0
         get() = rateControl.voltage * 40.0
 
-    var tidalVolumeSetting = volumeContol.voltage * 800
-        get() = volumeContol.voltage * 800
+    var tidalVolumeSetting = volumeControl.voltage * 800
+        get() = volumeControl.voltage * 800
 
-    var motorMode
+    var motorMode: DcMotor.RunMode
         get() = ventMotor.mode
         set(value) {
             ventMotor.mode = value
@@ -131,8 +131,6 @@ class RoboVent(hardwareMap: HardwareMap) {
             ventMotor.power = value
         }
 
-//    val tunerSetting
-//        get() = volumeContol.voltage
 
 
 }

@@ -3,10 +3,11 @@ package org.firstinspires.ftc.teamcode.teamcode
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 
 @Autonomous(name = "Forward Only Autonomous (Blue)", group = "Holobot")
-
+@Disabled
 class ForwardOnlyAutonomous : LinearOpMode() {
 
     override fun runOpMode() {

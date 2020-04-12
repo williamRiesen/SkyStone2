@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teamcode
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -9,6 +10,7 @@ import kotlin.math.PI
 const val ROTATION_SPEED_ADJUST = 0.5
 
 @TeleOp(name = "TeleOp", group = "TurtleDozer.")
+@Disabled
 class TeleOp : OpMode() {
     private lateinit var robot: TurtleDozerTeleBot
     private val timer = ElapsedTime()

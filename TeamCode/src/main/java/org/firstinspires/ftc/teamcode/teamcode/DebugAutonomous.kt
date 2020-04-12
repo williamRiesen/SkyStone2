@@ -3,11 +3,12 @@ package org.firstinspires.ftc.teamcode.teamcode
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import java.lang.Math.PI
 
 @Autonomous(name = "Debug Autonomous", group = "Holobot")
-
+@Disabled
 class DebugAutonomous : LinearOpMode() {
 
     override fun runOpMode() {
