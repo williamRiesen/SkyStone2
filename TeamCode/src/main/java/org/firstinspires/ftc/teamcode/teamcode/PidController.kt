@@ -11,21 +11,22 @@ class PidControl : OpMode() {
     private var deltaPrior = 0.0
     private var integralPrior = 0.0
     private val kp = 0.0005
-    private val ki = 0.00005
+    private var ki = 0.0035
     private val kd = 0
-    private var bias = 0.15
+    private var bias = 0.0
     private val iterationTimer = ElapsedTime()
     private val cycleTimer = ElapsedTime()
     private var endInspiratoryPosition = 300
     private val endExpiratoryPosition = 0
-    private val targetExpiratorySpeed = -450.0
-    private val targetInspiratorySpeed = 450.0
-    private var targetSpeed = targetInspiratorySpeed
+    private val targetExpiratorySpeed = -300.0
+    private val targetInspiratorySpeed = 300.0
+    private var targetSpeed = 0.0
     private var targetPosition = endInspiratoryPosition
-    private var state = VentState.DELIVERING_INSPIRATION
+    private var state = VentState.WAITNG_AFTER_EXPIRATION
     private var positionPrior = 0
     private val loadRamp = 0.0005
     private var applyRamp = 1.0
+    private var peakPower = 0.0
 
     override fun init() {
         vent = RoboVent(hardwareMap)
@@ -34,9 +35,10 @@ class PidControl : OpMode() {
     }
 
     override fun init_loop() {
-        telemetry.addData("Resp Rate: ", vent.respiratoryRateSetting)
-        telemetry.addData("Load Ramp: ", vent.rampSetting)
+        telemetry.addData("Resp Rate Setting: ", vent.respiratoryRateSetting)
+        telemetry.addData("Tidal Volume Setting: ", vent.tidalVolumeSetting)
         telemetry.update()
+        cycleTimer.reset()
     }
 
     override fun loop() {
@@ -49,7 +51,7 @@ class PidControl : OpMode() {
             switchToExpiration()
         } else if (state == VentState.ALLOWING_EXPIRATION && vent.currentPosition < endExpiratoryPosition) {
             switchToWaitingAfterExpiration()
-        } else if (state == VentState.WAITNG_AFTER_EXPIRATION && cycleTimer.seconds() > cycleTime){
+        } else if (state == VentState.WAITNG_AFTER_EXPIRATION && cycleTimer.seconds() > cycleTime) {
             switchToInspiration()
         }
 
@@ -60,18 +62,21 @@ class PidControl : OpMode() {
         val delta = targetSpeed - currentSpeed
         val integral = integralPrior + delta * iterationTime
         val derivative = (delta - deltaPrior) / iterationTime
-        val ramp = currentPosition * loadRamp  * applyRamp
+        val ramp = currentPosition * loadRamp * applyRamp
+        ki
         val output = kp * delta + ki * integral + kd * derivative + bias + ramp
         deltaPrior = delta
         integralPrior = integral
         positionPrior = currentPosition
+        if (output > peakPower) peakPower = output
 
         vent.motorPower = output
 //        telemetry.addData("Speed: ", currentSpeed)
 //        telemetry.addData("Delta: ", delta)
-//        telemetry.addData("Integral: ", integral)
+        telemetry.addData("Integral: ", integral)
 //        telemetry.addData("Load Ramp:", loadRamp)
-        telemetry.addData("Motor Power: ", vent.motorPower)
+        telemetry.addData("Tidal Volume Setting: ", vent.tidalVolumeSetting)
+        telemetry.addData("Peak Power: ", peakPower)
         telemetry.update()
         Thread.sleep(10)
     }
@@ -110,6 +115,7 @@ class PidControl : OpMode() {
         bias = 0.15
         applyRamp = 1.0
 //        targetPosition = endInspiratoryPosition
+        peakPower = 0.0
         resetPID()
     }
 

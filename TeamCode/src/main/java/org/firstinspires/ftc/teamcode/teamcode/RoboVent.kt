@@ -90,8 +90,8 @@ class RoboVent(hardwareMap: HardwareMap) {
     var respiratoryRateSetting = rateControl.voltage * 40.0
         get() = rateControl.voltage * 40.0
 
-    var tidalVolumeSetting = 450 // volumeContol.voltage * 800
-//        get() = volumeContol.voltage * 800
+    var tidalVolumeSetting = volumeContol.voltage * 800
+        get() = volumeContol.voltage * 800
 
     var motorMode
         get() = ventMotor.mode
@@ -108,8 +108,8 @@ class RoboVent(hardwareMap: HardwareMap) {
             ventMotor.power = value
         }
 
-    val rampSetting
-        get() = volumeContol.voltage
+//    val tunerSetting
+//        get() = volumeContol.voltage
 
 
 
