@@ -14,6 +14,8 @@ const val I_TO_E_RATIO = 0.33
 const val TIDAL_VOLUME_CALIBRATION = 1.0
 const val HIGH_PRESSURE_ALARM_THRESHOLD = 0.75
 const val TACHYPNEA_THRESHOLD = 24
+const val TARGET_EXPIRATORY_SPEED = -300.0
+const val TARGET_INSPIRATORY_SPEED = 300.0
 
 @TeleOp(name = "A/C Ventilation", group = "RoboVent")
 class PidControl : OpMode() {
@@ -31,7 +33,7 @@ class PidControl : OpMode() {
     private val targetExpiratorySpeed = -300.0
     private val targetInspiratorySpeed = 300.0
     private var targetSpeed = 0.0
-    private var state = VentState.WAITNG_AFTER_EXPIRATION
+    private var state = VentState.WAITING_AFTER_EXPIRATION
     private var positionPrior = 0
     private val loadRamp = 0.0005
     private var applyRamp = 1.0
@@ -69,7 +71,7 @@ class PidControl : OpMode() {
             switchToExpiration()
         } else if (state == VentState.ALLOWING_EXPIRATION && vent.currentPosition < endExpiratoryPosition) {
             switchToWaitingAfterExpiration()
-        } else if (state == VentState.WAITNG_AFTER_EXPIRATION && cycleTimer.seconds() > cycleTime) {
+        } else if (state == VentState.WAITING_AFTER_EXPIRATION && cycleTimer.seconds() > cycleTime) {
             switchToInspiration()
         }
 
@@ -92,7 +94,7 @@ class PidControl : OpMode() {
         vent.highPressureAlarm = peakPower > HIGH_PRESSURE_ALARM_THRESHOLD
         airflow = vent.readAirflow()
         trigger = airflow > BASELINE_AIRFLOW_SENSOR_OUTPUT + TRIGGER_THRESHOLD
-        if (trigger && state == VentState.WAITNG_AFTER_EXPIRATION)switchToInspiration()
+        if (trigger && state == VentState.WAITING_AFTER_EXPIRATION)switchToInspiration()
         if (airflow > 1000) apneaTimer.reset()
         vent.apneaAlarm = apneaTimer.seconds() > 10.0
         if (airflow < 250) returnFlowTimer.reset()
@@ -128,7 +130,7 @@ class PidControl : OpMode() {
     }
 
     private fun switchToWaitingAfterExpiration() {
-        state = VentState.WAITNG_AFTER_EXPIRATION
+        state = VentState.WAITING_AFTER_EXPIRATION
         targetSpeed = 0.0
         bias = 0.0
         applyRamp = 0.0

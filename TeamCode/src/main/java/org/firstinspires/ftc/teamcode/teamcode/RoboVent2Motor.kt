@@ -3,12 +3,13 @@ package org.firstinspires.ftc.teamcode.teamcode
 import com.qualcomm.robotcore.hardware.*
 import com.qualcomm.robotcore.util.ElapsedTime
 
-//const val ALARM_RESET_POSITION = 0.0
-//const val ALARM_STRIKE_POSITION = 0.12
+const val ALARM_RESET_POSITION = 0.0
+const val ALARM_STRIKE_POSITION = 0.12
 
-class RoboVent(hardwareMap: HardwareMap) {
+class RoboVent2Motor(hardwareMap: HardwareMap) {
 
-    private val ventMotor: DcMotor = hardwareMap.get(DcMotor::class.java, "vent_motor")
+    val rightVentMotor: DcMotor = hardwareMap.get(DcMotor::class.java, "vent_motor2")
+    val leftVentMotor: DcMotor = hardwareMap.get(DcMotor::class.java, "vent_motor")
     //    val button: DigitalChannel = hardwareMap.get<DigitalChannel>(DigitalChannel::class.java, "sensor_digital")
     private val airflowSensor = hardwareMap.get(I2cDeviceSynch::class.java, "airflow_sensor")!!
     private val rateControl = hardwareMap.get(AnalogInput::class.java, "rate_control")
@@ -22,10 +23,6 @@ class RoboVent(hardwareMap: HardwareMap) {
     var alarmsSilenced = false
     var breathCount = 0
     var peakPower = 0.0
-    var speedDelta = 0.0
-    var positionPrior = 0
-    var integralPrior = 0.0
-    var deltaPrior = 0.0
 
     private val apneaTimer = ElapsedTime()
     private val returnFlowTimer = ElapsedTime()
@@ -33,35 +30,18 @@ class RoboVent(hardwareMap: HardwareMap) {
     private val bellTimer = ElapsedTime()
     private val silenceTimer = ElapsedTime()
     val cycleTimer = ElapsedTime()
-    val iterationTimer = ElapsedTime()
 
-    var respiratoryRateSetting = rateControl.voltage * 40.0
+
+    val respiratoryRateSetting
         get() = rateControl.voltage * 40.0
 
-    var tidalVolumeSetting = volumeControl.voltage * 800
+    val tidalVolumeSetting
         get() = volumeControl.voltage * 800
 
-    var motorMode: DcMotor.RunMode
-        get() = ventMotor.mode
-        set(value) {
-            ventMotor.mode = value
-        }
-
-    val currentPosition
-        get() = ventMotor.currentPosition
-
-    var motorPower
-        get() = ventMotor.power
-        set(value) {
-            ventMotor.power = value
-        }
-
     init {
-        ventMotor.direction = DcMotorSimple.Direction.REVERSE
-        ventMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-        ventMotor.targetPosition = 0
-        ventMotor.mode = DcMotor.RunMode.RUN_TO_POSITION
-        ventMotor.power = 0.0
+        rightVentMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        leftVentMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        leftVentMotor.direction = DcMotorSimple.Direction.REVERSE
 //        button.mode = DigitalChannel.Mode.INPUT
         airflowSensor.engage()
         val manufacturerAddress = I2cAddr.create7bit(0x49)
@@ -131,8 +111,26 @@ class RoboVent(hardwareMap: HardwareMap) {
         alarmBell.position = ALARM_RESET_POSITION
     }
 
+    fun setPowerBothMotors(power: Double){
+        rightVentMotor.power = power
+        synchronizeMotors()
+    }
 
+    private val motorSynchronizer = PidController(
+            setPoint = 0.0,
+            initialOutput = 0.2,
+            kp = 0.001,
+            ki = 0.0,
+            kd = 0.0
+    )
 
+    private fun synchronizeMotors(){
+        val motorDiscrepancy = (rightVentMotor.currentPosition - leftVentMotor.currentPosition).toDouble()
+        leftVentMotor.power = motorSynchronizer.run(motorDiscrepancy)
+    }
 
-
+    val inspiration: BreathCycleStepTwoMotor = InspirationTwoMotor()
+    val postExpiratoryPause: BreathCycleStepTwoMotor = PostExpiratoryPauseTwoMotor()
+    val postInspiratoryPause: BreathCycleStepTwoMotor = PostInspiratoryPauseTwoMotor((tidalVolumeSetting * TIDAL_VOLUME_CALIBRATION).toInt())
+    val expiration: BreathCycleStepTwoMotor = ExpirationTwoMotor()
 }
