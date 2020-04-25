@@ -20,6 +20,7 @@ class AcVentilationTwoMotor: OpMode() {
         telemetry.addData("Resp Rate Setting: ", vent.respiratoryRateSetting)
         telemetry.addData("Tidal Volume Setting: ", vent.tidalVolumeSetting)
         telemetry.update()
+        vent.respiratoryRateCounter.respiratoryRateTimer.reset()
     }
 
     override fun loop() {
@@ -28,7 +29,7 @@ class AcVentilationTwoMotor: OpMode() {
         vent.updateAlarmConditions()
         vent.updateAlarmBell()
         updateDisplay()
-        Thread.sleep(10)
+        Thread.sleep(2)
     }
 
     private fun updateDisplay(){
@@ -41,6 +42,7 @@ class AcVentilationTwoMotor: OpMode() {
         telemetry.addData("", alarmString)
         telemetry.addData("Step", currentBreathCycleStep.toString())
         telemetry.addData("Resp Rate Setting: ", vent.respiratoryRateSetting)
+        telemetry.addData("Resp Rate Actual", vent.respiratoryRateCounter.readRate())
         telemetry.addData("Tidal Volume Setting: ", vent.tidalVolumeSetting)
 //        telemetry.addData("Peak Power", vent.peakPower)
         telemetry.addData("Proposed Power", proposedPower )

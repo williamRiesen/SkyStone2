@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.teamcode
 import com.qualcomm.robotcore.util.ElapsedTime
 
 class PidController(var setPoint: Double,
-                    private val initialOutput: Double,
+                    var initialOutput: Double,
                     private val kp: Double,
                     private val ki: Double,
                     private val kd: Double) {

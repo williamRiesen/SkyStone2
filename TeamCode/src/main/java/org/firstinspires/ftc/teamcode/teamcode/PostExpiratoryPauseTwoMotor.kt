@@ -16,7 +16,7 @@ class PostExpiratoryPauseTwoMotor : BreathCycleStepTwoMotor {
         if (vent.cycleTimer.seconds() > cycleTime || patientTriggers ) {
             updatedBreathCycleStep = vent.inspiration
             vent.cycleTimer.reset()
-            vent.breathCount += 1
+            vent.respiratoryRateCounter.recordBreathGiven()
             endExpirationHoldPositionController.reset()
         }
         return updatedBreathCycleStep
@@ -24,7 +24,8 @@ class PostExpiratoryPauseTwoMotor : BreathCycleStepTwoMotor {
 
 
     override fun runVentMotor(vent: RoboVent2Motor): Double {
-        vent.setPowerBothMotors(endExpirationHoldPositionController.run(vent.rightVentMotor.currentPosition.toDouble()) )
+//        vent.setPowerBothMotors(endExpirationHoldPositionController.run(vent.rightVentMotor.currentPosition.toDouble()) )
+        vent.setPowerBothMotors(0.0)
         return 0.0
     }
 

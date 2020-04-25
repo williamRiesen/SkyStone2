@@ -21,7 +21,7 @@ class InspirationTwoMotor : BreathCycleStepTwoMotor {
             updatedBreathCycleStep = vent.postInspiratoryPause
             inspirationSpeedController.reset()
         }
-        return this // updatedBreathCycleStep
+        return updatedBreathCycleStep
     }
 
     override fun runVentMotor(vent: RoboVent2Motor): Double {

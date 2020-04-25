@@ -36,7 +36,9 @@ class RoboVent2Motor(hardwareMap: HardwareMap) {
         get() = rateControl.voltage * 40.0
 
     val tidalVolumeSetting
-        get() = volumeControl.voltage * 800
+        get() = volumeControl.voltage * 1600
+
+    val respiratoryRateCounter = RespiratoryRateCounter()
 
     init {
         rightVentMotor.mode = DcMotor.RunMode.RUN_USING_ENCODER
@@ -46,6 +48,7 @@ class RoboVent2Motor(hardwareMap: HardwareMap) {
         airflowSensor.engage()
         val manufacturerAddress = I2cAddr.create7bit(0x49)
         airflowSensor.i2cAddress = manufacturerAddress
+        respiratoryRateCounter.breathLog.add(0.0)
     }
 
 
@@ -113,19 +116,20 @@ class RoboVent2Motor(hardwareMap: HardwareMap) {
 
     fun setPowerBothMotors(power: Double){
         rightVentMotor.power = power
-        synchronizeMotors()
+        synchronizeMotors(power)
     }
 
     private val motorSynchronizer = PidController(
             setPoint = 0.0,
-            initialOutput = 0.2,
+            initialOutput = 0.3,
             kp = 0.001,
             ki = 0.0,
             kd = 0.0
     )
 
-    private fun synchronizeMotors(){
+    private fun synchronizeMotors(power: Double){
         val motorDiscrepancy = (rightVentMotor.currentPosition - leftVentMotor.currentPosition).toDouble()
+        motorSynchronizer.initialOutput = power
         leftVentMotor.power = motorSynchronizer.run(motorDiscrepancy)
     }
 
@@ -133,4 +137,11 @@ class RoboVent2Motor(hardwareMap: HardwareMap) {
     val postExpiratoryPause: BreathCycleStepTwoMotor = PostExpiratoryPauseTwoMotor()
     val postInspiratoryPause: BreathCycleStepTwoMotor = PostInspiratoryPauseTwoMotor((tidalVolumeSetting * TIDAL_VOLUME_CALIBRATION).toInt())
     val expiration: BreathCycleStepTwoMotor = ExpirationTwoMotor()
+
+    fun resetEncoders(){
+        rightVentMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+        rightVentMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+        leftVentMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+        leftVentMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+    }
 }

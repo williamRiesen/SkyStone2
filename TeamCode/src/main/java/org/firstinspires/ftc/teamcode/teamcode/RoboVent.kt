@@ -66,6 +66,7 @@ class RoboVent(hardwareMap: HardwareMap) {
         airflowSensor.engage()
         val manufacturerAddress = I2cAddr.create7bit(0x49)
         airflowSensor.i2cAddress = manufacturerAddress
+
     }
 
 

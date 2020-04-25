@@ -15,7 +15,7 @@ class PostInspiratoryPauseTwoMotor(initialTargetPosition: Int) : BreathCycleStep
         val cycleTime = SECONDS_IN_A_MINUTE / vent.respiratoryRateSetting
         val startExpirationTime = cycleTime * I_TO_E_RATIO
         if (vent.cycleTimer.seconds() > startExpirationTime) {
-            updatedBreathCycleStep = vent.inspiration
+            updatedBreathCycleStep = vent.expiration
             endInspirationHoldPositionController.reset()
         }
         return updatedBreathCycleStep
@@ -23,9 +23,8 @@ class PostInspiratoryPauseTwoMotor(initialTargetPosition: Int) : BreathCycleStep
 
     override fun runVentMotor(vent: RoboVent2Motor): Double {
         endInspirationHoldPositionController.setPoint = vent.tidalVolumeSetting * TIDAL_VOLUME_CALIBRATION
-//        vent.setPowerBothMotors(endInspirationHoldPositionController.run(vent.rightVentMotor.currentPosition.toDouble()) )
         vent.setPowerBothMotors(0.0)
-        return 0.0
+        return endInspirationHoldPositionController.run(vent.rightVentMotor.currentPosition.toDouble())
     }
 
 
